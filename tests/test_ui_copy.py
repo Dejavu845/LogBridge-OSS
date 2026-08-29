@@ -73,13 +73,13 @@ def test_preview_overlay_badge_feichengpian():
 
 def test_paired_idt_picker_not_two_dropdowns():
     inspector = _read(INSPECTOR)
-    assert "Paired IDT" in inspector
-    assert 'Picker("Paired IDT"' in inspector
+    assert "成对 IDT" in inspector
+    assert 'Picker("成对 IDT"' in inspector
     assert 'Picker("Curve"' not in inspector
     assert 'Picker("Gamut"' not in inspector
     assert "S-Log3 + S-Gamut3" in inspector
     assert "S-Log3 + S-Gamut3.Cine" in inspector
-    assert "Venice pair only if detected" in inspector
+    assert "Venice 成对只在检测到机身时出现" in inspector
 
 
 def test_pending_clips_block_process_and_export():
@@ -174,25 +174,27 @@ def test_no_bundled_manufacturer_demos():
     assert "No bundled camera manufacturer demo" in blob or "does **not** bundle camera manufacturer demo" in blob
     assert "drop your own" in blob.lower() or "drops their own" in blob.lower()
     sidebar = _read(SWIFT_ROOT / "LogBridge/LogBridge/Views/ClipSidebarView.swift")
-    assert "no bundled manufacturer demos" in sidebar.lower()
+    assert "不内置厂商样片" in sidebar
+    assert "no bundled manufacturer demos" not in sidebar.lower()
     assert "把混源文件夹拖进来" in sidebar
 
 
 def test_as_shot_wb_copy_and_no_5600_guess():
     inspector = _read(INSPECTOR)
     assert "as-shot" in inspector.lower() or "As-shot" in inspector
-    assert "Pick neutral" in inspector
+    assert "点灰卡" in inspector
+    assert "pickingNeutral" in inspector or "点灰卡" in inspector
     assert "5600" in inspector  # named so we can say we do not guess it
     assert "6504" in inspector
     assert "不猜 5600" in inspector
     assert "ACES2065-1 (AP0)" in inspector
-    assert "after IDT" in inspector
+    assert "IDT 之后" in inspector
     assert "已实现（未验证）" in inspector
     assert "CAT(user→D65)·inv(CAT(as→D65))" in inspector
     assert "单位阵" in inspector
     assert "3200→5600 变暖" in inspector
     swift = _all_swift()
-    assert "pickNeutral" in swift or "Pick neutral" in swift
+    assert "pickingNeutral" in swift
     assert "asShotUnknown" in swift or "as-shot unknown" in swift
     assert "WBSource" in swift
     assert "handlePreviewPick" in swift
@@ -821,7 +823,7 @@ def test_write_progress_on_preview_inspector_locks():
 
     idt = inspector.split("struct PairedIDTBar")[1].split("struct InspectorView")[0]
     assert "成对 IDT" in idt
-    assert 'Picker("Paired IDT"' in idt
+    assert 'Picker("成对 IDT"' in idt
     assert ".disabled(" in idt
     assert "isExporting" in idt
     assert "if session.isExporting" not in idt
@@ -958,7 +960,7 @@ def test_arrow_keys_select_adjacent_clip():
 def test_delete_removes_clip_from_session_not_disk():
     """Delete/Backspace drops the selected clip from the session only.
 
-    Source file and any already-written `_proxy` stay on disk. Mid-write
+    Source file and any already-written `{stem}_ACES2065-1` / `_proxy` stay on disk. Mid-write
     ignores Delete. Text fields keep Delete. No new button. No confirm sheet.
     Preview chrome stays #33. #40 evicts the removed clip's preview cache.
     """
@@ -1093,7 +1095,7 @@ def test_delete_removes_clip_from_session_not_disk():
     assert "_proxy" in readme
     assert "Delete/Backspace removes the selected clip from the session only" in acceptance
     assert "does not delete, trash, or move the source file" in acceptance
-    assert "already-written `_proxy`" in acceptance
+    assert "already-written `{stem}_ACES2065-1` / `_proxy`" in acceptance
     assert "select next, else previous" in acceptance
     assert "把混源文件夹拖进来" in acceptance
     assert "整段代理，不是全精度成片" in readme

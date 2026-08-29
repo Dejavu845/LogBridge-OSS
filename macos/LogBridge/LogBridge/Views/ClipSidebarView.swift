@@ -80,7 +80,7 @@ private struct DropZone: View {
                 .font(empty ? .subheadline.weight(.semibold) : .caption)
                 .foregroundStyle(.primary)
             if empty {
-                Text("拖入自己的 Log，不内置厂商样片 — no bundled manufacturer demos")
+                Text("拖入自己的 Log，不内置厂商样片")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)

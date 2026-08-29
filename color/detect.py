@@ -18,9 +18,21 @@ from __future__ import annotations
 
 from dataclasses import dataclass, replace
 from pathlib import Path
+import re
 
 from .as_shot import AsShotWB, read_as_shot_wb
 from .gamuts import IDT_PAIRS, VENICE_IDTS
+
+# d-log-m / d_log_m / dlogm / D-Log M — must win before a bare d-log lock.
+_DLOG_M_RE = re.compile(r"d[-_\s]?log[-_\s]?m(?![a-z0-9])", re.IGNORECASE)
+NOTE_DLOG_M = "D-Log M 暂不支持。请用 2017 D-Log + D-Gamut。"
+NOTE_UNRESOLVED = "读不到元数据，先选择 Log 与色域。"
+
+
+def _is_dlog_m(*parts: str) -> bool:
+    """True for D-Log M tokens. d-log-m must not lock as 2017 D-Log."""
+    blob = " ".join(p or "" for p in parts)
+    return _DLOG_M_RE.search(blob) is not None
 
 
 def _venice_hit(*parts: str) -> bool:
@@ -330,14 +342,14 @@ def _detect_from_metadata_idt(meta: dict) -> Detection | None:
         return _pair("apple_log_bt2020", "metadata", "Apple Log metadata")
 
     dji = str(cleaned.get("dji_gamma", cleaned.get("dji_log", ""))).lower()
-    if "d-log m" in dji or "dlog m" in dji or "dlogm" in dji or "d-logm" in dji:
+    if _is_dlog_m(dji):
         return Detection(
             None,
             None,
             None,
             "metadata",
             True,
-            "D-Log M is unsupported. D-Log + D-Gamut (2017 white paper) is implemented (unverified).",
+            NOTE_DLOG_M,
         )
     if "d-log" in dji or "dlog" in dji:
         return _pair("dji_dlog_dgamut", "metadata", "DJI D-Log metadata")
@@ -355,14 +367,14 @@ def _detect_from_metadata_idt(meta: dict) -> Detection | None:
 
 def _unsupported_filename(name: str) -> Detection | None:
     """D-Log M stays unresolved — never a silent IDT. No public decode/xy."""
-    if "d-log m" in name or "dlog m" in name or "dlogm" in name or "d-logm" in name:
+    if _is_dlog_m(name):
         return Detection(
             None,
             None,
             None,
             "filename",
             True,
-            "D-Log M is unsupported. D-Log + D-Gamut (2017) is implemented (unverified).",
+            NOTE_DLOG_M,
         )
     return None
 
@@ -384,8 +396,8 @@ def detect_from_filename(path: str) -> Detection | None:
             None,
             "filename",
             True,
-            "C-Log2 in filename without gamut; pick a paired IDT "
-            "(C-Log2 + Cinema Gamut or C-Log2 + BT.2020). Never default Cinema Gamut",
+            "文件名只有 C-Log2，先选择成对 IDT"
+            "（C-Log2 + Cinema Gamut 或 C-Log2 + BT.2020）。不默认 Cinema Gamut",
         )
     if "c-log3" in name or "clog3" in name:
         if "cinema" in name or "cgamut" in name or "c-gamut" in name:
@@ -398,8 +410,8 @@ def detect_from_filename(path: str) -> Detection | None:
             None,
             "filename",
             True,
-            "C-Log3 in filename without gamut; pick a paired IDT "
-            "(C-Log3 + Cinema Gamut or C-Log3 + BT.2020). Never default Cinema Gamut",
+            "文件名只有 C-Log3，先选择成对 IDT"
+            "（C-Log3 + Cinema Gamut 或 C-Log3 + BT.2020）。不默认 Cinema Gamut",
         )
     # Check more specific tokens first (already ordered).
     venice = _venice_hit(name)
@@ -420,9 +432,9 @@ def detect_from_filename(path: str) -> Detection | None:
             None,
             "filename",
             True,
-            "S-Log3 in filename without gamut; pick a paired IDT "
-            "(S-Log3 + S-Gamut3 or S-Log3 + S-Gamut3.Cine). Never default Cine"
-            + (" (Venice pairs offered)" if venice else ""),
+            "文件名只有 S-Log3，先选择成对 IDT"
+            "（S-Log3 + S-Gamut3 或 S-Log3 + S-Gamut3.Cine）。不默认 Cine"
+            + ("（提供 Venice 成对）" if venice else ""),
             venice_detected=venice,
         )
     return None
@@ -486,7 +498,7 @@ def detect_clip(
             None,
             "unresolved",
             True,
-            "读不到元数据，先选择 Log 与色域。QuickTime nclc is never used.",
+            NOTE_UNRESOLVED,
         ),
         as_shot,
     )

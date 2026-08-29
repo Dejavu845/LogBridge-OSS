@@ -34,7 +34,8 @@ with a per-clip error — not a preview refresh. Pending clips in the same
 bin do not block.
 
 While writing, progress is 「写出代理 i/N · frame k」 (k/total when known).
-Cancel becomes the same primary button. The in-progress ``_proxy`` folder
+Cancel becomes the same primary button. The in-progress
+``{stem}_ACES2065-1`` folder (or ``_ACES2065-1_proxy`` if reduced)
 is removed so a half sequence is not a finished deliverable; completed
 clips stay. Cancelled status says 已取消 and still 整段代理，不是全精度成片.
 Partial output is 不是成片. A successful write remembers the dest folder

@@ -92,9 +92,9 @@ enum IDT: String, CaseIterable, Identifiable, Hashable {
 
     var menuLabel: String {
         if isStub {
-            return "\(pairLabel) — stub, not implemented"
+            return "\(pairLabel) — 未实现"
         }
-        return "\(pairLabel) — implemented (unverified)"
+        return "\(pairLabel) — 已实现（未验证）"
     }
 
     /// OCIO colorspace name in ocio/config.ocio.

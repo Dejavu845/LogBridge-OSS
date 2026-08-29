@@ -81,7 +81,7 @@ struct ContentView: View {
 /// Window-level Up/Down for the sidebar list. Escape while writing is the
 /// existing 取消 (same cancelLockedDeliverables). Idle Escape does nothing.
 /// Delete / Backspace drops the selected clip from the session only
-/// (source file and already-written `_proxy` stay). Mid-write ignores Delete.
+/// (source file and already-written `{stem}_ACES2065-1` / `_proxy` stay). Mid-write ignores Delete.
 /// No help overlay. No extra button. No confirm sheet.
 /// Same window only; text / numeric / search first-responders keep arrows
 /// and Delete. Sheets / alerts / settings keep Escape and Delete.

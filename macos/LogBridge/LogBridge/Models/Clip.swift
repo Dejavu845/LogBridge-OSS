@@ -36,7 +36,7 @@ struct Clip: Identifiable, Hashable {
             return idt.pairLabel
         }
         if let curve = detectedCurve {
-            return "\(curve) + (pick pair)"
+            return "\(curve) + 待选"
         }
         return "先选择成对 IDT"
     }
@@ -68,7 +68,7 @@ struct Clip: Identifiable, Hashable {
     }
 
     var verificationBadge: String {
-        if let idt, idt.isStub { return "stub" }
+        if let idt, idt.isStub { return "未实现" }
         if isPending { return "待选" }
         return "已实现（未验证）"
     }
@@ -91,6 +91,16 @@ enum DetectionSource: String, Hashable {
     case model
     case user
     case unresolved
+
+    var displayLabel: String {
+        switch self {
+        case .metadata: return "元数据"
+        case .filename: return "文件名"
+        case .model: return "机身"
+        case .user: return "用户"
+        case .unresolved: return "未识别"
+        }
+    }
 }
 
 /// Locked-clip dest estimate. Uncompressed float32 RGB EXR (12 bytes / pixel).
@@ -209,7 +219,7 @@ final class SessionModel: ObservableObject {
     }
 
     var processSelectedBlockedReason: String? {
-        guard let clip = selectedClip else { return "No clip selected" }
+        guard let clip = selectedClip else { return "先点一条素材" }
         return clip.processSkipReason
     }
 
@@ -708,7 +718,7 @@ final class SessionModel: ObservableObject {
         clips[idx].detectedGamut = idt.gamut
         clips[idx].detectionSource = .user
         clips[idx].needsUserPicker = false
-        clips[idx].detectionNote = "user picker (paired IDT)"
+        clips[idx].detectionNote = "用户选择成对 IDT"
         preview.invalidateIDT(clipID: id)
         // Lock of the selected pending clip: land on the next 待选.
         // Mid-write (#32) does not change selection. Does not lock the next IDT.
@@ -760,7 +770,7 @@ final class SessionModel: ObservableObject {
 
     /// Delete / Backspace: drop the selected clip from the SESSION only.
     /// Does not delete, trash, or move the source file. Does not delete an
-    /// already-written `_proxy` folder — leave it on disk; just drop the row.
+    /// already-written `{stem}_ACES2065-1` / `_proxy` folder — leave it on disk; just drop the row.
     /// After remove, select next, else previous. Preview chrome follows #33
     /// (`processSkipReason` / `exportChip` on the new selected clip).
     /// #40: evict the removed clip's preview cache.
@@ -775,7 +785,7 @@ final class SessionModel: ObservableObject {
         guard let id = selectedID, let idx = clips.firstIndex(where: { $0.id == id }) else {
             return false
         }
-        // Session list only. Source file and any already-written `_proxy` stay.
+        // Session list only. Source file and any already-written `{stem}_ACES2065-1` / `_proxy` stay.
         clips.remove(at: idx)
         preview.evict(clipID: id)
         if clips.indices.contains(idx) {

@@ -18,7 +18,7 @@ struct PairedIDTBar: View {
             }
             if let clip = session.selectedClip {
                 // One locked pair per row. Never two independent curve/gamut dropdowns.
-                Picker("Paired IDT", selection: Binding(
+                Picker("成对 IDT", selection: Binding(
                     get: { clip.idt },
                     set: { newValue in
                         if let idt = newValue {
@@ -36,7 +36,7 @@ struct PairedIDTBar: View {
                 .frame(maxWidth: 420)
                 .disabled(session.isExporting)
                 // S-Log3 + S-Gamut3 vs S-Log3 + S-Gamut3.Cine. C-Log2 / C-Log3 + Cinema Gamut vs BT.2020. Venice pair only if detected.
-                .help("S-Log3 + S-Gamut3 vs S-Log3 + S-Gamut3.Cine. C-Log2 / C-Log3 + Cinema Gamut vs BT.2020. Venice pair only if detected.")
+                .help("成对选择：S-Log3 + S-Gamut3 或 S-Log3 + S-Gamut3.Cine。C-Log2 / C-Log3 选 Cinema Gamut 或 BT.2020。Venice 成对只在检测到机身时出现。")
                 HStack(spacing: 6) {
                     Text(clip.verificationBadge)
                         .font(.caption2)
@@ -44,7 +44,7 @@ struct PairedIDTBar: View {
                         .padding(.vertical, 1)
                         .background(clip.isPending ? Color.yellow.opacity(0.28) : Color.orange.opacity(0.2))
                         .clipShape(Capsule())
-                    Text("来源：\(clip.detectionSource.rawValue)")
+                    Text("来源：\(clip.detectionSource.displayLabel)")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                     if clip.veniceDetected {
@@ -134,12 +134,12 @@ struct WBInspector: View {
                 session.pickingNeutral.toggle()
             }
             .controlSize(.small)
-            .help("Pick neutral / 点灰卡: sample after IDT in ACES2065-1 (AP0) linear; overrides metadata. Writes the existing CAT node.")
+            .help("点灰卡：IDT 之后在 ACES2065-1 (AP0) 线性取样，覆盖元数据，写入现有 CAT 节点。")
             Button("估计白平衡") {
                 session.proposeAutoWB()
             }
             .controlSize(.small)
-            .help("白平衡（估计）: SoG p=6 in ACEScg after IDT. Does not write CAT. Low confidence stays empty. Not 精准.")
+            .help("白平衡（估计）：IDT 之后在 ACEScg 做 SoG p=6。不写入 CAT。把握不够就留空。不是精准。")
             if session.graph.autoWBCCT != nil {
                 Text("白平衡（估计） \(Int(session.graph.autoWBCCT ?? 0)) K — 确认后才写入，一点不会写入")
                     .font(.caption2)

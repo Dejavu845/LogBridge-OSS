@@ -302,6 +302,36 @@ def test_filename_dlog_m_unsupported():
     assert any(s["id"] == "dji_dlog_m" for s in STUB_IDTS)
 
 
+def test_filename_dlog_m_hyphen_not_silent_dlog():
+    """d-log-m / d_log_m must not lock as 2017 D-Log + D-Gamut."""
+    from color.detect import NOTE_DLOG_M
+
+    for name in (
+        "clip_d-log-m.mov",
+        "clip_d_log_m.mov",
+        "Osmo_D-LogM.mov",
+        "Osmo_DLog-M.mov",
+    ):
+        d = detect_from_filename(name)
+        assert d.idt_id is None, name
+        assert d.needs_user_picker
+        assert d.note == NOTE_DLOG_M
+
+
+def test_filename_dlog_without_m_still_locks():
+    d = detect_from_filename("DJI_DLog_clip.mov")
+    assert d.idt_id == "dji_dlog_dgamut"
+
+
+def test_metadata_dlog_m_hyphen_not_silent_dlog():
+    from color.detect import NOTE_DLOG_M
+
+    d = detect_from_metadata({"dji_gamma": "D-Log-M"})
+    assert d.idt_id is None
+    assert d.needs_user_picker
+    assert d.note == NOTE_DLOG_M
+
+
 def test_filename_apple_log2_locks_awg_not_bt2020():
     d = detect_from_filename("IMG_AppleLog2.mov")
     assert d.idt_id == "apple_log2_awg"
@@ -356,8 +386,10 @@ def test_swift_ui_names_logc3_ei800_awg3_and_apple_log2_awg():
     assert 'case appleLog2AWG = "apple_log2_awg"' in idt
     assert "appleLog2Stub" not in idt
     assert "arriLogC3Stub" not in idt
-    assert "filename LogC3 EI800 + AWG3" in detector
-    assert "filename Apple Log 2 + Apple Wide Gamut" in detector
+    assert "文件名：LogC3 EI800 + AWG3" in detector
+    assert "文件名：Apple Log 2 + Apple Wide Gamut" in detector
     assert "ARRI LogC3 is unsupported" not in detector
     assert "Apple Log 2 is unsupported" not in detector
-    assert "D-Log M is unsupported" in detector
+    assert "D-Log M 暂不支持" in detector
+    assert "isDLogM" in detector
+    assert r"d[-_\s]?log[-_\s]?m(?![a-z0-9])" in detector
