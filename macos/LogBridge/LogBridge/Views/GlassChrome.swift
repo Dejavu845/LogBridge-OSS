@@ -72,7 +72,7 @@ struct GlassModule<Content: View>: View {
                             endPoint: .center
                         )
                     )
-                    .frame(height: 28)
+                    .frame(height: 36)
                     .clipShape(RoundedRectangle(cornerRadius: radius, style: .continuous))
                     .allowsHitTesting(false)
             }
@@ -132,6 +132,35 @@ struct GlassHairline: View {
         Rectangle()
             .fill(GlassChrome.hairlineDim)
             .frame(height: 1)
+    }
+}
+
+/// Primary / cancel look without AppKit borderedProminent chrome.
+struct GlassActionButtonStyle: ButtonStyle {
+    var cancel: Bool = false
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.caption.weight(.semibold))
+            .padding(.horizontal, 11)
+            .padding(.vertical, 5)
+            .background {
+                Capsule()
+                    .fill(.ultraThinMaterial)
+                    .overlay {
+                        Capsule()
+                            .fill(
+                                (cancel ? GlassChrome.pending : GlassChrome.locked)
+                                    .opacity(configuration.isPressed ? 0.50 : 0.30)
+                            )
+                    }
+            }
+            .overlay {
+                Capsule()
+                    .strokeBorder(Color.white.opacity(0.32), lineWidth: 0.8)
+            }
+            .foregroundStyle(.white)
+            .scaleEffect(configuration.isPressed ? 0.98 : 1)
     }
 }
 

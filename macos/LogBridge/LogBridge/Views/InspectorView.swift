@@ -9,6 +9,9 @@ struct PairedIDTBar: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Image(systemName: "link")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(GlassChrome.locked)
                 Text("成对 IDT")
                     .font(.caption.weight(.semibold))
                 Text("先选 Log 与色域，才能处理")

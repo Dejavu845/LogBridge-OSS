@@ -9,6 +9,9 @@ struct ClipSidebarView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack {
+                Image(systemName: "film")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(GlassChrome.locked)
                 Text("素材")
                     .font(.subheadline.weight(.semibold))
                 Spacer()
@@ -117,6 +120,19 @@ private struct DropZone: View {
                         .fill(targeted ? GlassChrome.locked.opacity(0.12) : Color.clear)
                 }
         }
+        .overlay(alignment: .top) {
+            RoundedRectangle(cornerRadius: GlassChrome.moduleRadius, style: .continuous)
+                .fill(
+                    LinearGradient(
+                        colors: [Color.white.opacity(0.12), Color.clear],
+                        startPoint: .top,
+                        endPoint: .center
+                    )
+                )
+                .frame(height: 28)
+                .clipShape(RoundedRectangle(cornerRadius: GlassChrome.moduleRadius, style: .continuous))
+                .allowsHitTesting(false)
+        }
         .overlay(
             RoundedRectangle(cornerRadius: GlassChrome.moduleRadius, style: .continuous)
                 .strokeBorder(
@@ -182,11 +198,18 @@ struct ClipRow: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background {
             RoundedRectangle(cornerRadius: GlassChrome.tileRadius, style: .continuous)
-                .fill(selected ? Color.white.opacity(0.10) : Color.white.opacity(0.03))
+                .fill(.ultraThinMaterial)
+                .overlay {
+                    RoundedRectangle(cornerRadius: GlassChrome.tileRadius, style: .continuous)
+                        .fill(selected ? Color.white.opacity(0.10) : Color.white.opacity(0.02))
+                }
         }
         .overlay {
             RoundedRectangle(cornerRadius: GlassChrome.tileRadius, style: .continuous)
-                .strokeBorder(selected ? GlassChrome.hairline : Color.clear, lineWidth: 1)
+                .strokeBorder(
+                    selected ? GlassChrome.locked.opacity(0.55) : GlassChrome.hairlineDim,
+                    lineWidth: selected ? 1 : 0.8
+                )
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 2)

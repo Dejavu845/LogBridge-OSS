@@ -210,7 +210,7 @@ struct ProcessLockedBar: View {
                             session.processLockedClips()
                         }
                     }
-                    .buttonStyle(.borderedProminent)
+                    .buttonStyle(GlassActionButtonStyle(cancel: session.isWritingDeliverables))
                     .controlSize(.small)
                     .help("整段代理，不是全精度成片。ACES2065-1 AP0 线性，不是 ACEScct。待选跳过（先选择 Log 与色域 / 先选择成对 IDT）。")
                 }
@@ -244,6 +244,7 @@ struct AdvancedPanel: View {
                     Button("导出 ACEScct / EXR") {
                         session.exportResolve()
                     }
+                    .buttonStyle(GlassActionButtonStyle())
                     .controlSize(.small)
                     .disabled(!session.canProcess)
                     .help("只处理已锁定片段。待选跳过。709 预览。预览·非成片。不必全部锁定。")
@@ -305,10 +306,21 @@ struct SplitPreview: View {
                 }
             }
             .padding(8)
+            .background {
+                RoundedRectangle(cornerRadius: GlassChrome.moduleRadius, style: .continuous)
+                    .fill(.ultraThinMaterial)
+            }
             .clipShape(RoundedRectangle(cornerRadius: GlassChrome.moduleRadius, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: GlassChrome.moduleRadius, style: .continuous)
-                    .strokeBorder(GlassChrome.hairline, lineWidth: 1)
+                    .strokeBorder(
+                        LinearGradient(
+                            colors: [GlassChrome.hairline, GlassChrome.hairlineDim],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1
+                    )
             }
             .padding(8)
             if session.isExporting {
@@ -332,11 +344,10 @@ struct WriteProgressLine: View {
             .lineLimit(1)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 10)
-            .padding(.vertical, 5)
-            .background(.ultraThinMaterial)
-            .overlay(alignment: .top) {
-                GlassHairline()
-            }
+            .padding(.vertical, 6)
+            .glassModule(radius: GlassChrome.tileRadius, padding: 0)
+            .padding(.horizontal, 8)
+            .padding(.bottom, 4)
     }
 }
 
@@ -347,6 +358,18 @@ struct StatusBar: View {
     var body: some View {
         HStack(spacing: 10) {
             Text("LogBridge · 已实现（未验证）")
+                .font(.caption.weight(.semibold))
+                .padding(.horizontal, 7)
+                .padding(.vertical, 3)
+                .background {
+                    Capsule()
+                        .fill(GlassChrome.locked.opacity(0.22))
+                }
+                .overlay {
+                    Capsule()
+                        .strokeBorder(Color.white.opacity(0.28), lineWidth: 0.8)
+                }
+                .foregroundStyle(GlassChrome.locked)
             if session.preview.isWorking {
                 ProgressView()
                     .controlSize(.small)
