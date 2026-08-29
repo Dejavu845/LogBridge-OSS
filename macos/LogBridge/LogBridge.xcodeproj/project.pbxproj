@@ -1,0 +1,384 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A10000000000000000000001 /* LogBridgeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000001 /* LogBridgeApp.swift */; };
+		A10000000000000000000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000002 /* ContentView.swift */; };
+		A10000000000000000000003 /* IDT.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000003 /* IDT.swift */; };
+		A10000000000000000000004 /* Clip.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000004 /* Clip.swift */; };
+		A10000000000000000000005 /* Pipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000005 /* Pipeline.swift */; };
+		A10000000000000000000006 /* ClipDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000006 /* ClipDetector.swift */; };
+		A10000000000000000000007 /* Rec709PreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000007 /* Rec709PreviewView.swift */; };
+		A10000000000000000000008 /* WhiteBalance.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000008 /* WhiteBalance.swift */; };
+		A10000000000000000000009 /* ResolveExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000009 /* ResolveExporter.swift */; };
+		A1000000000000000000000A /* FutureIDTs.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000A /* FutureIDTs.swift */; };
+		A1000000000000000000000B /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000B /* Metal.framework */; };
+		A1000000000000000000000C /* MetalKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000C /* MetalKit.framework */; };
+		A1000000000000000000000D /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000D /* AVFoundation.framework */; };
+		A1000000000000000000000E /* NodeGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000010 /* NodeGraph.swift */; };
+		A1000000000000000000000F /* NodeStripView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000011 /* NodeStripView.swift */; };
+		A10000000000000000000010 /* InspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000012 /* InspectorView.swift */; };
+		A10000000000000000000011 /* ClipSidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000013 /* ClipSidebarView.swift */; };
+		A10000000000000000000012 /* PreviewEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000014 /* PreviewEngine.swift */; };
+		A10000000000000000000013 /* VideoToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A20000000000000000000015 /* VideoToolbox.framework */; };
+		A10000000000000000000014 /* MediaFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000016 /* MediaFormat.swift */; };
+		A10000000000000000000015 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000017 /* AppSettings.swift */; };
+		A10000000000000000000016 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000018 /* SettingsView.swift */; };
+		A10000000000000000000017 /* HDRPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000019 /* HDRPreview.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		A20000000000000000000001 /* LogBridgeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogBridgeApp.swift; sourceTree = "<group>"; };
+		A20000000000000000000002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		A20000000000000000000003 /* IDT.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IDT.swift; sourceTree = "<group>"; };
+		A20000000000000000000004 /* Clip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Clip.swift; sourceTree = "<group>"; };
+		A20000000000000000000005 /* Pipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Pipeline.swift; sourceTree = "<group>"; };
+		A20000000000000000000006 /* ClipDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipDetector.swift; sourceTree = "<group>"; };
+		A20000000000000000000007 /* Rec709PreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Rec709PreviewView.swift; sourceTree = "<group>"; };
+		A20000000000000000000008 /* WhiteBalance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhiteBalance.swift; sourceTree = "<group>"; };
+		A20000000000000000000009 /* ResolveExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResolveExporter.swift; sourceTree = "<group>"; };
+		A2000000000000000000000A /* FutureIDTs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FutureIDTs.swift; sourceTree = "<group>"; };
+		A2000000000000000000000B /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
+		A2000000000000000000000C /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = System/Library/Frameworks/MetalKit.framework; sourceTree = SDKROOT; };
+		A2000000000000000000000D /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		A2000000000000000000000E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A20000000000000000000010 /* NodeGraph.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NodeGraph.swift; sourceTree = "<group>"; };
+		A20000000000000000000011 /* NodeStripView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NodeStripView.swift; sourceTree = "<group>"; };
+		A20000000000000000000012 /* InspectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InspectorView.swift; sourceTree = "<group>"; };
+		A20000000000000000000013 /* ClipSidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipSidebarView.swift; sourceTree = "<group>"; };
+		A20000000000000000000014 /* PreviewEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewEngine.swift; sourceTree = "<group>"; };
+		A20000000000000000000015 /* VideoToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoToolbox.framework; path = System/Library/Frameworks/VideoToolbox.framework; sourceTree = SDKROOT; };
+		A20000000000000000000016 /* MediaFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaFormat.swift; sourceTree = "<group>"; };
+		A20000000000000000000017 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
+		A20000000000000000000018 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		A20000000000000000000019 /* HDRPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HDRPreview.swift; sourceTree = "<group>"; };
+		A2000000000000000000000F /* LogBridge.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LogBridge.entitlements; sourceTree = "<group>"; };
+		A30000000000000000000001 /* LogBridge.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LogBridge.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A40000000000000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A1000000000000000000000B /* Metal.framework in Frameworks */,
+				A1000000000000000000000C /* MetalKit.framework in Frameworks */,
+				A1000000000000000000000D /* AVFoundation.framework in Frameworks */,
+				A10000000000000000000013 /* VideoToolbox.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A50000000000000000000001 = {
+			isa = PBXGroup;
+			children = (
+				A50000000000000000000002 /* LogBridge */,
+				A50000000000000000000008 /* Frameworks */,
+				A50000000000000000000009 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A50000000000000000000002 /* LogBridge */ = {
+			isa = PBXGroup;
+			children = (
+				A20000000000000000000001 /* LogBridgeApp.swift */,
+				A20000000000000000000002 /* ContentView.swift */,
+				A50000000000000000000003 /* Models */,
+				A50000000000000000000004 /* Detection */,
+				A50000000000000000000005 /* Color */,
+				A50000000000000000000006 /* Export */,
+				A50000000000000000000007 /* Stubs */,
+				A5000000000000000000000A /* Views */,
+				A5000000000000000000000B /* Preview */,
+				A2000000000000000000000E /* Info.plist */,
+				A2000000000000000000000F /* LogBridge.entitlements */,
+			);
+			path = LogBridge;
+			sourceTree = "<group>";
+		};
+		A50000000000000000000003 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				A20000000000000000000003 /* IDT.swift */,
+				A20000000000000000000004 /* Clip.swift */,
+				A20000000000000000000005 /* Pipeline.swift */,
+				A20000000000000000000010 /* NodeGraph.swift */,
+				A20000000000000000000016 /* MediaFormat.swift */,
+				A20000000000000000000017 /* AppSettings.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		A5000000000000000000000A /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				A20000000000000000000011 /* NodeStripView.swift */,
+				A20000000000000000000012 /* InspectorView.swift */,
+				A20000000000000000000013 /* ClipSidebarView.swift */,
+				A20000000000000000000018 /* SettingsView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		A5000000000000000000000B /* Preview */ = {
+			isa = PBXGroup;
+			children = (
+				A20000000000000000000014 /* PreviewEngine.swift */,
+			);
+			path = Preview;
+			sourceTree = "<group>";
+		};
+		A50000000000000000000004 /* Detection */ = {
+			isa = PBXGroup;
+			children = (
+				A20000000000000000000006 /* ClipDetector.swift */,
+			);
+			path = Detection;
+			sourceTree = "<group>";
+		};
+		A50000000000000000000005 /* Color */ = {
+			isa = PBXGroup;
+			children = (
+				A20000000000000000000007 /* Rec709PreviewView.swift */,
+				A20000000000000000000019 /* HDRPreview.swift */,
+				A20000000000000000000008 /* WhiteBalance.swift */,
+			);
+			path = Color;
+			sourceTree = "<group>";
+		};
+		A50000000000000000000006 /* Export */ = {
+			isa = PBXGroup;
+			children = (
+				A20000000000000000000009 /* ResolveExporter.swift */,
+			);
+			path = Export;
+			sourceTree = "<group>";
+		};
+		A50000000000000000000007 /* Stubs */ = {
+			isa = PBXGroup;
+			children = (
+				A2000000000000000000000A /* FutureIDTs.swift */,
+			);
+			path = Stubs;
+			sourceTree = "<group>";
+		};
+		A50000000000000000000008 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				A2000000000000000000000B /* Metal.framework */,
+				A2000000000000000000000C /* MetalKit.framework */,
+				A2000000000000000000000D /* AVFoundation.framework */,
+				A20000000000000000000015 /* VideoToolbox.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		A50000000000000000000009 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A30000000000000000000001 /* LogBridge.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A60000000000000000000001 /* LogBridge */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A80000000000000000000002 /* Build configuration list for PBXNativeTarget "LogBridge" */;
+			buildPhases = (
+				A70000000000000000000001 /* Sources */,
+				A40000000000000000000001 /* Frameworks */,
+				A70000000000000000000002 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = LogBridge;
+			productName = LogBridge;
+			productReference = A30000000000000000000001 /* LogBridge.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A90000000000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1540;
+				LastUpgradeCheck = 1540;
+				TargetAttributes = {
+					A60000000000000000000001 = {
+						CreatedOnToolsVersion = 15.4;
+					};
+				};
+			};
+			buildConfigurationList = A80000000000000000000001 /* Build configuration list for PBXProject "LogBridge" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = A50000000000000000000001;
+			productRefGroup = A50000000000000000000009 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A60000000000000000000001 /* LogBridge */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A70000000000000000000002 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A70000000000000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000000000000000000001 /* LogBridgeApp.swift in Sources */,
+				A10000000000000000000002 /* ContentView.swift in Sources */,
+				A10000000000000000000003 /* IDT.swift in Sources */,
+				A10000000000000000000004 /* Clip.swift in Sources */,
+				A10000000000000000000005 /* Pipeline.swift in Sources */,
+				A10000000000000000000006 /* ClipDetector.swift in Sources */,
+				A10000000000000000000007 /* Rec709PreviewView.swift in Sources */,
+				A10000000000000000000008 /* WhiteBalance.swift in Sources */,
+				A10000000000000000000009 /* ResolveExporter.swift in Sources */,
+				A1000000000000000000000A /* FutureIDTs.swift in Sources */,
+				A1000000000000000000000E /* NodeGraph.swift in Sources */,
+				A1000000000000000000000F /* NodeStripView.swift in Sources */,
+				A10000000000000000000010 /* InspectorView.swift in Sources */,
+				A10000000000000000000011 /* ClipSidebarView.swift in Sources */,
+				A10000000000000000000012 /* PreviewEngine.swift in Sources */,
+				A10000000000000000000014 /* MediaFormat.swift in Sources */,
+				A10000000000000000000015 /* AppSettings.swift in Sources */,
+				A10000000000000000000016 /* SettingsView.swift in Sources */,
+				A10000000000000000000017 /* HDRPreview.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		AA0000000000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_TESTABILITY = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		AA0000000000000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		AA0000000000000000000003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = LogBridge/LogBridge.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = LogBridge/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.logbridge.LogBridge;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		AA0000000000000000000004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = LogBridge/LogBridge.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = LogBridge/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.logbridge.LogBridge;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A80000000000000000000001 /* Build configuration list for PBXProject "LogBridge" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA0000000000000000000001 /* Debug */,
+				AA0000000000000000000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A80000000000000000000002 /* Build configuration list for PBXNativeTarget "LogBridge" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA0000000000000000000003 /* Debug */,
+				AA0000000000000000000004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = A90000000000000000000001 /* Project object */;
+}

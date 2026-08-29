@@ -1,0 +1,433 @@
+ocio_profile_version: 2.2
+
+# LogBridge M1 + M2-start OCIO config.
+# scene_linear / reference: ACES2065-1 (AP0).
+# color_timing: ACEScct (Academy grading). WB / preview sit here.
+# Do NOT use DaVinci Wide Gamut Intermediate as the internal reference.
+#
+# IDTs with a standard Builtin use BuiltinTransform (Mac OCIO).
+# F-Log2, N-Log, C-Log2+BT.2020, C-Log3+BT.2020, D-Log have no full IDT Builtin.
+# C-Log2+Cinema Gamut / C-Log3+Cinema Gamut / Apple Log 1 / LogC3 EI800+AWG3
+# use BuiltinTransform. Apple Log 2: CURVE - APPLE_LOG_to_LINEAR + AWG matrix.
+# No APPLE_LOG2 Builtin.
+# Rec.2100 HLG / PQ use ACES Output Transform / BT.2100 BuiltinTransform
+# (no homemade HLG/PQ curve). Rec.709 stays preview-only DIY OETF.
+# Python color/ calls Builtins when PyOpenColorIO is importable; otherwise
+# it uses matching white-paper reference implementations for IDT 18% tests.
+# HDR apply requires OCIO. All paths: implemented (unverified). Not supported.
+
+environment: {}
+
+search_path: luts:matrices
+
+roles:
+  scene_linear: ACES2065-1
+  color_timing: ACEScct
+  compositing_log: ACEScct
+  default: ACES2065-1
+  data: Raw
+  reference: ACES2065-1
+  rendering: ACES2065-1
+  color_picking: Rec.709
+  rec709: Rec.709
+  matte_paint: ACEScct
+  texture_paint: ACES2065-1
+  aces_interchange: ACES2065-1
+  cie_xyz_d65_interchange: CIE-XYZ-D65
+
+file_rules:
+  - !<Rule> {name: Default, colorspace: default}
+
+displays:
+  Rec.709:
+    - !<View> {name: Rec.709, colorspace: Rec.709}
+  Rec.2100-HLG:
+    - !<View> {name: Rec.2100-HLG, colorspace: Rec.2100-HLG}
+  Rec.2100-PQ:
+    - !<View> {name: Rec.2100-PQ, colorspace: Rec.2100-PQ}
+  ACEScct:
+    - !<View> {name: ACEScct, colorspace: ACEScct}
+
+active_displays: [Rec.709]
+active_views: [Rec.709]
+
+colorspaces:
+  - !<ColorSpace>
+    name: Raw
+    family: Data
+    isdata: true
+    allocation: uniform
+
+  - !<ColorSpace>
+    name: ACES2065-1
+    family: ACES
+    equalitygroup: ""
+    bitdepth: 32f
+    aliases: [Linear AP0]
+    isdata: false
+    allocation: lg2
+    allocationvars: [-8, 8, 0.00390625]
+    description: |
+      ACES2065-1 (AP0 scene-linear). LogBridge M1 interchange / scene_linear.
+      Every IDT lands here. WB CAT runs in this AP0 linear space.
+
+  - !<ColorSpace>
+    name: ACEScg
+    family: ACES
+    bitdepth: 32f
+    isdata: false
+    description: Linear AP1 (ACEScg). Scene-linear form of ACEScct.
+    to_scene_reference: !<BuiltinTransform> {style: ACEScg_to_ACES2065-1}
+
+  - !<ColorSpace>
+    name: ACEScct
+    family: ACES
+    bitdepth: 32f
+    isdata: false
+    description: |
+      ACEScct (AP1 log). Timeline / grading encode. Rec.709 is preview only.
+      Implemented (unverified). White balance is ACES2065-1 (AP0) scene-linear, never log.
+    to_scene_reference: !<BuiltinTransform> {style: ACEScct_to_ACES2065-1}
+
+  - !<ColorSpace>
+    name: CIE-XYZ-D65
+    family: Working
+    bitdepth: 32f
+    isdata: false
+    allocation: uniform
+    from_scene_reference: !<BuiltinTransform> {style: UTILITY - ACES-AP0_to_CIE-XYZ-D65_BFD}
+
+  - !<ColorSpace>
+    name: Rec.709
+    family: Output
+    bitdepth: 32f
+    isdata: false
+    description: |
+      Rec.709 primaries + BT.709 OETF. Preview framebuffers MUST be tagged
+      Rec.709 (CGColorSpace.itur_709 / Metal layer.colorspace). Never blit
+      Rec.709 pixels into an untagged Display P3 surface.
+      Simple ODT, no RRT/DRT. Implemented (unverified).
+    from_scene_reference: !<GroupTransform>
+      children:
+        - !<BuiltinTransform> {style: ACEScg_to_ACES2065-1, direction: inverse}
+        - !<BuiltinTransform> {style: UTILITY - ACES-AP1_to_LINEAR-REC709_BFD}
+        - !<FileTransform> {src: lin_to_Rec709_oetf.spi1d, interpolation: linear}
+    to_scene_reference: !<GroupTransform>
+      children:
+        - !<FileTransform> {src: lin_to_Rec709_oetf.spi1d, interpolation: linear, inverse: true}
+        - !<BuiltinTransform> {style: UTILITY - ACES-AP1_to_LINEAR-REC709_BFD, direction: inverse}
+        - !<BuiltinTransform> {style: ACEScg_to_ACES2065-1}
+
+  - !<ColorSpace>
+    name: Rec.2100-HLG
+    family: Output
+    bitdepth: 32f
+    isdata: false
+    aliases: ["Output - Rec.2100-HLG - 1000 nit", "BT.2100 HLG"]
+    description: |
+      Rec.2100 HLG via ACES Output Transform / BT.2100 (BuiltinTransform).
+      ACES-OUTPUT - ACES2065-1_to_CIE-XYZ-D65 - HDR-VIDEO-1000nits-15nits-HLG_1.1
+      then DISPLAY - CIE-XYZ-D65_to_REC.2100-HLG
+      config-aces: Output - Rec.2100-HLG - 1000 nit
+      ACES 2.0 alias (if registry has it):
+      ACES-OUTPUT - ACES2065-1_to_CIE-XYZ-D65 - Rec.2100-HLG-1000nit_2.0
+      Implemented (unverified). Not supported. Not 一键精准.
+      No homemade HLG curve.
+    from_scene_reference: !<GroupTransform>
+      children:
+        - !<BuiltinTransform> {style: ACES-OUTPUT - ACES2065-1_to_CIE-XYZ-D65 - HDR-VIDEO-1000nits-15nits-HLG_1.1}
+        - !<BuiltinTransform> {style: DISPLAY - CIE-XYZ-D65_to_REC.2100-HLG}
+
+  - !<ColorSpace>
+    name: Rec.2100-PQ
+    family: Output
+    bitdepth: 32f
+    isdata: false
+    aliases: ["Output - Rec.2100-Rec.2020-ST2084 - 1000 nit", "BT.2100 PQ"]
+    description: |
+      Rec.2100 PQ via ACES Output Transform / BT.2100 (BuiltinTransform).
+      ACES-OUTPUT - ACES2065-1_to_CIE-XYZ-D65 - HDR-VIDEO-1000nits-15nits-ST2084_1.1
+      then DISPLAY - CIE-XYZ-D65_to_REC.2100-REC2020-ST2084
+      config-aces: Output - Rec.2100-Rec.2020-ST2084 - 1000 nit
+      ACES 2.0 alias (if registry has it):
+      ACES-OUTPUT - ACES2065-1_to_CIE-XYZ-D65 - Rec.2100-Rec.2020-ST2084-1000nit_2.0
+      Implemented (unverified). Not supported. Not 一键精准.
+      No homemade PQ / ST.2084 curve.
+    from_scene_reference: !<GroupTransform>
+      children:
+        - !<BuiltinTransform> {style: ACES-OUTPUT - ACES2065-1_to_CIE-XYZ-D65 - HDR-VIDEO-1000nits-15nits-ST2084_1.1}
+        - !<BuiltinTransform> {style: DISPLAY - CIE-XYZ-D65_to_REC.2100-REC2020-ST2084}
+
+  - !<ColorSpace>
+    name: ARRI LogC4 AWG4
+    family: Input/LogBridge
+    equalitygroup: ""
+    bitdepth: 32f
+    description: |
+      ARRI LogC4 + AWG4. EI-independent. Do not keep handwritten a/b/c + homemade AWG4 matrix.
+      OCIO BuiltinTransform: ARRI_LOGC4_to_ACES2065-1
+      Status: implemented (unverified). Not marked supported.
+    isdata: false
+    allocation: uniform
+    to_scene_reference: !<BuiltinTransform> {style: ARRI_LOGC4_to_ACES2065-1}
+
+  - !<ColorSpace>
+    name: ARRI LogC3 EI800 AWG3
+    family: Input/LogBridge
+    equalitygroup: ""
+    bitdepth: 32f
+    description: |
+      ARRI LogC3 EI800 + ALEXA Wide Gamut 3 only. Not a generic LogC3. EI>1600 has no closed form. 18% grey encodes to 0.391. ACES CSC / ARRI 2017-03.
+      OCIO BuiltinTransform: ARRI_ALEXA-LOGC-EI800-AWG_to_ACES2065-1
+      Status: implemented (unverified). Not marked supported.
+    isdata: false
+    allocation: uniform
+    to_scene_reference: !<BuiltinTransform> {style: ARRI_ALEXA-LOGC-EI800-AWG_to_ACES2065-1}
+
+  - !<ColorSpace>
+    name: Sony S-Log3 S-Gamut3
+    family: Input/LogBridge
+    equalitygroup: ""
+    bitdepth: 32f
+    description: |
+      Sony S-Log3 + S-Gamut3. Do NOT default S-Log3 to S-Gamut3.Cine. User/metadata picks the gamut.
+      OCIO BuiltinTransform: SONY_SLOG3-SGAMUT3_to_ACES2065-1
+      Status: implemented (unverified). Not marked supported.
+    isdata: false
+    allocation: uniform
+    to_scene_reference: !<BuiltinTransform> {style: SONY_SLOG3-SGAMUT3_to_ACES2065-1}
+
+  - !<ColorSpace>
+    name: Sony S-Log3 S-Gamut3.Cine
+    family: Input/LogBridge
+    equalitygroup: ""
+    bitdepth: 32f
+    description: |
+      Sony S-Log3 + S-Gamut3.Cine. Separate IDT; never the implicit S-Log3 default.
+      OCIO BuiltinTransform: SONY_SLOG3-SGAMUT3.CINE_to_ACES2065-1
+      Status: implemented (unverified). Not marked supported.
+    isdata: false
+    allocation: uniform
+    to_scene_reference: !<BuiltinTransform> {style: SONY_SLOG3-SGAMUT3.CINE_to_ACES2065-1}
+
+  - !<ColorSpace>
+    name: Sony S-Log3 S-Gamut3 Venice
+    family: Input/LogBridge
+    equalitygroup: ""
+    bitdepth: 32f
+    description: |
+      Venice body only. Never a silent S-Log3 default.
+      OCIO BuiltinTransform: SONY_SLOG3-SGAMUT3-VENICE_to_ACES2065-1
+      Status: implemented (unverified). Not marked supported.
+    isdata: false
+    allocation: uniform
+    to_scene_reference: !<BuiltinTransform> {style: SONY_SLOG3-SGAMUT3-VENICE_to_ACES2065-1}
+
+  - !<ColorSpace>
+    name: Sony S-Log3 S-Gamut3.Cine Venice
+    family: Input/LogBridge
+    equalitygroup: ""
+    bitdepth: 32f
+    description: |
+      Venice body + S-Gamut3.Cine only. Never a silent default.
+      OCIO BuiltinTransform: SONY_SLOG3-SGAMUT3.CINE-VENICE_to_ACES2065-1
+      Status: implemented (unverified). Not marked supported.
+    isdata: false
+    allocation: uniform
+    to_scene_reference: !<BuiltinTransform> {style: SONY_SLOG3-SGAMUT3.CINE-VENICE_to_ACES2065-1}
+
+  - !<ColorSpace>
+    name: Panasonic V-Log V-Gamut
+    family: Input/LogBridge
+    equalitygroup: ""
+    bitdepth: 32f
+    description: |
+      Panasonic V-Log + V-Gamut. Do not keep handwritten cut2/b/c/d as the OCIO IDT.
+      OCIO BuiltinTransform: PANASONIC_VLOG-VGAMUT_to_ACES2065-1
+      Status: implemented (unverified). Not marked supported.
+    isdata: false
+    allocation: uniform
+    to_scene_reference: !<BuiltinTransform> {style: PANASONIC_VLOG-VGAMUT_to_ACES2065-1}
+
+  - !<ColorSpace>
+    name: RED Log3G10 REDWideGamutRGB
+    family: Input/LogBridge
+    equalitygroup: ""
+    bitdepth: 32f
+    description: |
+      RED Log3G10 + REDWideGamutRGB. 18% grey maps to 1/3. Do not keep handwritten a/b/c/g as the OCIO IDT.
+      OCIO BuiltinTransform: RED_LOG3G10-RWG_to_ACES2065-1
+      Status: implemented (unverified). Not marked supported.
+    isdata: false
+    allocation: uniform
+    to_scene_reference: !<BuiltinTransform> {style: RED_LOG3G10-RWG_to_ACES2065-1}
+
+  - !<ColorSpace>
+    name: Fujifilm F-Log2 BT.2020
+    family: Input/LogBridge
+    equalitygroup: ""
+    bitdepth: 32f
+    description: |
+      Fujifilm F-Log2 (Data Sheet Ver.1.0, a=5.555556) + BT.2020 / D65.
+      No standard OCIO Builtin (do not use F-Log1 spi1d). 18% grey is 400/1023.
+      Status: implemented (unverified). Not marked supported.
+    isdata: false
+    allocation: uniform
+    to_scene_reference: !<GroupTransform>
+      children:
+        - !<FileTransform> {src: FLog2_to_lin.spi1d, interpolation: linear}
+        - !<MatrixTransform> {matrix: [0.6790856347, 0.1577009146, 0.1632134506, 0.0000000000, 0.0460020031, 0.8590546730, 0.0949433239, 0.0000000000, -0.0005739432, 0.0284677684, 0.9721061748, 0.0000000000, 0.0000000000, 0.0000000000, 0.0000000000, 1.0000000000]}
+    from_scene_reference: !<GroupTransform>
+      children:
+        - !<MatrixTransform> {matrix: [0.6790856347, 0.1577009146, 0.1632134506, 0.0000000000, 0.0460020031, 0.8590546730, 0.0949433239, 0.0000000000, -0.0005739432, 0.0284677684, 0.9721061748, 0.0000000000, 0.0000000000, 0.0000000000, 0.0000000000, 1.0000000000], inverse: true}
+        - !<FileTransform> {src: FLog2_to_lin.spi1d, interpolation: linear, inverse: true}
+
+  - !<ColorSpace>
+    name: Nikon N-Log BT.2020
+    family: Input/LogBridge
+    equalitygroup: ""
+    bitdepth: 32f
+    description: |
+      Nikon N-Log + BT.2020 / D65. White-paper x is 10-bit code 0-1023.
+      This LUT is sampled on 0-1 = code/1023 so OCIO buffers stay normalized;
+      the curve itself is evaluated at x*1023. Do not divide by 1023 in the Python API.
+      Decode: x<452 -> (x/650)^3-0.0075; else exp((x-619)/150) (natural exp).
+      452 is the breakpoint, NOT 18% grey (~372).
+      Status: implemented (unverified). Not marked supported.
+    isdata: false
+    allocation: uniform
+    to_scene_reference: !<GroupTransform>
+      children:
+        - !<FileTransform> {src: NLog_to_lin.spi1d, interpolation: linear}
+        - !<MatrixTransform> {matrix: [0.6790856347, 0.1577009146, 0.1632134506, 0.0000000000, 0.0460020031, 0.8590546730, 0.0949433239, 0.0000000000, -0.0005739432, 0.0284677684, 0.9721061748, 0.0000000000, 0.0000000000, 0.0000000000, 0.0000000000, 1.0000000000]}
+    from_scene_reference: !<GroupTransform>
+      children:
+        - !<MatrixTransform> {matrix: [0.6790856347, 0.1577009146, 0.1632134506, 0.0000000000, 0.0460020031, 0.8590546730, 0.0949433239, 0.0000000000, -0.0005739432, 0.0284677684, 0.9721061748, 0.0000000000, 0.0000000000, 0.0000000000, 0.0000000000, 1.0000000000], inverse: true}
+        - !<FileTransform> {src: NLog_to_lin.spi1d, interpolation: linear, inverse: true}
+
+  - !<ColorSpace>
+    name: Canon C-Log2 Cinema Gamut
+    family: Input/LogBridge
+    equalitygroup: ""
+    bitdepth: 32f
+    description: |
+      Canon C-Log2 + Cinema Gamut / D65. Never the silent C-Log2 default. Negative toe: OCIO CURVE - CANON_CLOG2_to_LINEAR / ACES CTL. Do not invent a mirrored toe.
+      OCIO BuiltinTransform: CANON_CLOG2-CGAMUT_to_ACES2065-1
+      Status: implemented (unverified). Not marked supported.
+    isdata: false
+    allocation: uniform
+    to_scene_reference: !<BuiltinTransform> {style: CANON_CLOG2-CGAMUT_to_ACES2065-1}
+
+  - !<ColorSpace>
+    name: Canon C-Log2 BT.2020
+    family: Input/LogBridge
+    equalitygroup: ""
+    bitdepth: 32f
+    description: |
+      Canon C-Log2 + BT.2020 / D65. No full IDT Builtin (C-Log2+Cinema Gamut has one).
+      Handwritten C-Log2 curve + BT.2020→AP0 if no Builtin (prefer CURVE - CANON_CLOG2_to_LINEAR).
+      Never the silent C-Log2 default. Status: implemented (unverified).
+    isdata: false
+    allocation: uniform
+    to_scene_reference: !<GroupTransform>
+      children:
+        - !<FileTransform> {src: CLog2_to_lin.spi1d, interpolation: linear}
+        - !<MatrixTransform> {matrix: [0.6790856347, 0.1577009146, 0.1632134506, 0.0000000000, 0.0460020031, 0.8590546730, 0.0949433239, 0.0000000000, -0.0005739432, 0.0284677684, 0.9721061748, 0.0000000000, 0.0000000000, 0.0000000000, 0.0000000000, 1.0000000000]}
+    from_scene_reference: !<GroupTransform>
+      children:
+        - !<MatrixTransform> {matrix: [0.6790856347, 0.1577009146, 0.1632134506, 0.0000000000, 0.0460020031, 0.8590546730, 0.0949433239, 0.0000000000, -0.0005739432, 0.0284677684, 0.9721061748, 0.0000000000, 0.0000000000, 0.0000000000, 0.0000000000, 1.0000000000], inverse: true}
+        - !<FileTransform> {src: CLog2_to_lin.spi1d, interpolation: linear, inverse: true}
+
+  - !<ColorSpace>
+    name: Canon C-Log3 Cinema Gamut
+    family: Input/LogBridge
+    equalitygroup: ""
+    bitdepth: 32f
+    description: |
+      Canon C-Log3 + Cinema Gamut / D65. Never the silent C-Log3 default. User/metadata picks the gamut.
+      OCIO BuiltinTransform: CANON_CLOG3-CGAMUT_to_ACES2065-1
+      Status: implemented (unverified). Not marked supported.
+    isdata: false
+    allocation: uniform
+    to_scene_reference: !<BuiltinTransform> {style: CANON_CLOG3-CGAMUT_to_ACES2065-1}
+
+  - !<ColorSpace>
+    name: Apple Log BT.2020
+    family: Input/LogBridge
+    equalitygroup: ""
+    bitdepth: 32f
+    description: |
+      Apple Log 1 + BT.2020 / D65. Apple Log 2 is a separate AWG pair.
+      OCIO BuiltinTransform: APPLE_LOG_to_ACES2065-1
+      Status: implemented (unverified). Not marked supported.
+    isdata: false
+    allocation: uniform
+    to_scene_reference: !<BuiltinTransform> {style: APPLE_LOG_to_ACES2065-1}
+
+  - !<ColorSpace>
+    name: Apple Log 2 Apple Wide Gamut
+    family: Input/LogBridge
+    equalitygroup: ""
+    bitdepth: 32f
+    description: |
+      Apple Log 2 + Apple Wide Gamut (ACES CSC.Apple.AppleLog2_to_ACES.ctl).
+      Curve is the same as Apple Log 1. No APPLE_LOG2 Builtin — do not claim one.
+      Prefer CURVE - APPLE_LOG_to_LINEAR + AWG→AP0. Not BT.2020.
+      Status: implemented (unverified). Not marked supported.
+    isdata: false
+    allocation: uniform
+    to_scene_reference: !<GroupTransform>
+      children:
+        - !<BuiltinTransform> {style: CURVE - APPLE_LOG_to_LINEAR}
+        - !<MatrixTransform> {matrix: [0.6949610493, 0.2414052688, 0.0636336819, 0.0000000000, 0.0473627464, 1.0042959251, -0.0516586715, 0.0000000000, -0.0219897894, -0.0289891050, 1.0509788943, 0.0000000000, 0.0000000000, 0.0000000000, 0.0000000000, 1.0000000000]}
+    from_scene_reference: !<GroupTransform>
+      children:
+        - !<MatrixTransform> {matrix: [0.6949610493, 0.2414052688, 0.0636336819, 0.0000000000, 0.0473627464, 1.0042959251, -0.0516586715, 0.0000000000, -0.0219897894, -0.0289891050, 1.0509788943, 0.0000000000, 0.0000000000, 0.0000000000, 0.0000000000, 1.0000000000], inverse: true}
+        - !<BuiltinTransform> {style: CURVE - APPLE_LOG_to_LINEAR, direction: inverse}
+
+  - !<ColorSpace>
+    name: Canon C-Log3 BT.2020
+    family: Input/LogBridge
+    equalitygroup: ""
+    bitdepth: 32f
+    description: |
+      Canon C-Log3 + BT.2020 / D65. No full IDT Builtin (C-Log3+Cinema Gamut has one).
+      Curve is ACES / Canon v1.2 three-segment (prefer CURVE - CANON_CLOG3_to_LINEAR when applying via OCIO).
+      Never the silent C-Log3 default. Status: implemented (unverified).
+    isdata: false
+    allocation: uniform
+    to_scene_reference: !<GroupTransform>
+      children:
+        - !<FileTransform> {src: CLog3_to_lin.spi1d, interpolation: linear}
+        - !<MatrixTransform> {matrix: [0.6790856347, 0.1577009146, 0.1632134506, 0.0000000000, 0.0460020031, 0.8590546730, 0.0949433239, 0.0000000000, -0.0005739432, 0.0284677684, 0.9721061748, 0.0000000000, 0.0000000000, 0.0000000000, 0.0000000000, 1.0000000000]}
+    from_scene_reference: !<GroupTransform>
+      children:
+        - !<MatrixTransform> {matrix: [0.6790856347, 0.1577009146, 0.1632134506, 0.0000000000, 0.0460020031, 0.8590546730, 0.0949433239, 0.0000000000, -0.0005739432, 0.0284677684, 0.9721061748, 0.0000000000, 0.0000000000, 0.0000000000, 0.0000000000, 1.0000000000], inverse: true}
+        - !<FileTransform> {src: CLog3_to_lin.spi1d, interpolation: linear, inverse: true}
+
+  - !<ColorSpace>
+    name: DJI D-Log D-Gamut
+    family: Input/LogBridge
+    equalitygroup: ""
+    bitdepth: 32f
+    description: |
+      DJI D-Log + D-Gamut (2017-10-10 white paper). No standard OCIO Builtin.
+      D-Log M is unsupported. Status: implemented (unverified). Not marked supported.
+    isdata: false
+    allocation: uniform
+    to_scene_reference: !<GroupTransform>
+      children:
+        - !<FileTransform> {src: DLog_to_lin.spi1d, interpolation: linear}
+        - !<MatrixTransform> {matrix: [0.6914303239, 0.2129062832, 0.0956633928, 0.0000000000, 0.0665972813, 1.0095465817, -0.0761438630, 0.0000000000, -0.0172435345, -0.0729864328, 1.0902299673, 0.0000000000, 0.0000000000, 0.0000000000, 0.0000000000, 1.0000000000]}
+    from_scene_reference: !<GroupTransform>
+      children:
+        - !<MatrixTransform> {matrix: [0.6914303239, 0.2129062832, 0.0956633928, 0.0000000000, 0.0665972813, 1.0095465817, -0.0761438630, 0.0000000000, -0.0172435345, -0.0729864328, 1.0902299673, 0.0000000000, 0.0000000000, 0.0000000000, 0.0000000000, 1.0000000000], inverse: true}
+        - !<FileTransform> {src: DLog_to_lin.spi1d, interpolation: linear, inverse: true}
+
+  # --- Explicitly unsupported (not implemented) ---
+  - !<ColorSpace>
+    name: DJI D-Log M (unsupported)
+    family: Input/Stub
+    bitdepth: 32f
+    isdata: false
+    description: UNSUPPORTED. D-Log M is not the 2017 D-Log + D-Gamut IDT.

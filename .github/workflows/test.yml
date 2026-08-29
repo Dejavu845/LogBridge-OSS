@@ -1,0 +1,49 @@
+name: test
+
+on:
+  push:
+  pull_request:
+
+# Linux pytest 保留。macos-15 只编现有 LogBridge scheme，并跑同一套 pytest。
+# Rec709PreviewView 里 CALayer.colorspace 用 KVC 对齐 runner Swift overlay（Xcode 26.3 仍无此 member）。
+# 不改 709 观感。Metal GPU、Finder 显示、真机写出 / 真机导出 在 Actions 上测不了，仍靠人在 Mac 上点。
+# 没有真机 CI，也不覆盖 Metal / Finder / 真写出。
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: python -m pip install --upgrade pip && pip install numpy pytest
+      - name: Test
+        run: python -m pytest -q
+
+  macos:
+    runs-on: macos-15
+    # 编 macos/LogBridge 现有 scheme；pytest 依赖与上面 Linux job 相同（numpy pytest）。
+    # Metal GPU、Finder 显示、真机写出 / 真机导出 仍靠人在 Mac 上点。没有真机 CI。
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile LogBridge scheme
+        working-directory: macos/LogBridge
+        run: |
+          xcodebuild \
+            -project LogBridge.xcodeproj \
+            -scheme LogBridge \
+            -destination 'generic/platform=macOS' \
+            -configuration Debug \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            build
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: python -m pip install --upgrade pip && pip install numpy pytest
+      - name: Test
+        run: python -m pytest -q
