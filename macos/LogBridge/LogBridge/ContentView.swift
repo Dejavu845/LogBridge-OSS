@@ -190,8 +190,11 @@ struct ProcessLockedBar: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack(spacing: 8) {
-                Text(session.lockStatusText)
-                    .font(.caption.weight(.semibold))
+                GlassChip(
+                    title: session.lockStatusText,
+                    on: session.showsProcessLockedButton,
+                    pending: !session.showsProcessLockedButton
+                )
                 if let reason = session.selectedClip?.processSkipReason {
                     Text(reason)
                         .font(.caption2)

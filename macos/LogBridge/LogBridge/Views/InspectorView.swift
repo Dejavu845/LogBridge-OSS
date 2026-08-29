@@ -101,8 +101,13 @@ struct WBInspector: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("白平衡")
-                .font(.subheadline.weight(.semibold))
+            HStack(spacing: 6) {
+                Image(systemName: "circle.lefthalf.filled")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(GlassChrome.locked)
+                Text("白平衡")
+                    .font(.subheadline.weight(.semibold))
+            }
             Toggle("启用白平衡（可旁路，不烘焙）", isOn: Binding(
                 get: { session.graph.wbEnabled },
                 set: { session.setWBEnabled($0) }
@@ -237,8 +242,13 @@ struct ExposureInspector: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("曝光")
-                .font(.subheadline.weight(.semibold))
+            HStack(spacing: 6) {
+                Image(systemName: "sun.max.fill")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(GlassChrome.pending)
+                Text("曝光")
+                    .font(.subheadline.weight(.semibold))
+            }
             Toggle("启用曝光（0 档 = 不动）", isOn: Binding(
                 get: { session.graph.exposureEnabled },
                 set: { session.setExposureEnabled($0) }

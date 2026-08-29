@@ -48,6 +48,10 @@ struct SettingsView: View {
             Text("已实现（未验证）。不写精准 / 一键还原 / 全自动校准。")
                 .font(.caption2)
                 .foregroundStyle(.secondary)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 8)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .glassModule(radius: GlassChrome.tileRadius, padding: 0)
         }
         .formStyle(.grouped)
         .frame(minWidth: 420, minHeight: 320)

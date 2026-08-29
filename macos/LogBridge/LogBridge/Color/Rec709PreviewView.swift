@@ -61,14 +61,14 @@ struct PreviewNotDeliverableBadge: View {
     var body: some View {
         Text("预览·非成片")
             .font(.caption2.weight(.bold))
-            .padding(.horizontal, 6)
-            .padding(.vertical, 3)
+            .padding(.horizontal, 7)
+            .padding(.vertical, 4)
             .background(.ultraThinMaterial)
             .foregroundStyle(.white)
-            .clipShape(RoundedRectangle(cornerRadius: 5, style: .continuous))
+            .clipShape(Capsule())
             .overlay {
-                RoundedRectangle(cornerRadius: 5, style: .continuous)
-                    .strokeBorder(Color.white.opacity(0.22), lineWidth: 0.8)
+                Capsule()
+                    .strokeBorder(Color.white.opacity(0.28), lineWidth: 0.8)
             }
             .padding(6)
             .accessibilityLabel("预览·非成片. 8-bit thumbnail is not a deliverable")
@@ -220,10 +220,14 @@ private struct PreviewPaneTitle: View {
         Text(title)
             .font(.caption2.weight(.semibold))
             .foregroundStyle(.white)
-            .padding(.horizontal, 6)
-            .padding(.vertical, 3)
-            .background(.black.opacity(0.55))
-            .clipShape(RoundedRectangle(cornerRadius: 5))
+            .padding(.horizontal, 7)
+            .padding(.vertical, 4)
+            .background(.ultraThinMaterial)
+            .clipShape(Capsule())
+            .overlay {
+                Capsule()
+                    .strokeBorder(Color.white.opacity(0.22), lineWidth: 0.8)
+            }
             .padding(6)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
     }
