@@ -147,6 +147,7 @@ def test_docs_name_the_review_locks():
     assert "读不到帧率，未核对" in blob
     assert "_proxy" in blob
     assert "ACEScct 成片" not in blob
+    assert "_ACES2065-1/frame_000000.exr" in blob
     assert "_ACES2065-1_proxy/frame_000000.exr" in blob
     assert "709 预览" in blob
     assert "先选择成对 IDT" in blob

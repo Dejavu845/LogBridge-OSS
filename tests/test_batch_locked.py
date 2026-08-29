@@ -22,6 +22,7 @@ from color.batch import (
     CONSERVATIVE_WIDTH,
     DELIVERABLE_DIR_SUFFIX,
     DELIVERABLE_SUFFIX,
+    PROXY_DIR_SUFFIX,
     DISK_ESTIMATE_ASSUMPTION,
     DISK_SHORT_STATUS,
     DISK_SHORT_STATUS_TEMPLATE,
@@ -329,7 +330,8 @@ def test_exr_writers_lock_st2065_1_ap0_chromaticities(tmp_path: Path):
         clips, tmp_path / "batch", frames={"clip.mov": _slog3_grey()}
     )
     seq = Path(report.written[0].path)
-    assert seq.name.endswith("_ACES2065-1_proxy")
+    assert seq.name.endswith("_ACES2065-1")
+    assert not seq.name.endswith("_ACES2065-1_proxy")
     _assert_st2065_1_chromaticities_on_disk(seq / sequence_frame_name(0))
 
     exporter = _read(SWIFT_ROOT / "LogBridge/LogBridge/Export/ResolveExporter.swift")
@@ -785,7 +787,8 @@ def test_write_16384_is_ceiling_refuse_not_downsample(tmp_path: Path):
     )
     assert len(report_ok.written) == 1
     written = Path(report_ok.written[0].path)
-    assert written.name.endswith("_ACES2065-1_proxy")
+    assert written.name.endswith("_ACES2065-1")
+    assert not written.name.endswith("_ACES2065-1_proxy")
     assert (written / "frame_000000.exr").is_file()
 
     engine = _read(SWIFT_ROOT / "LogBridge/LogBridge/Preview/PreviewEngine.swift")
@@ -837,7 +840,8 @@ def test_write_loop_one_pass_no_preview_8bit_no_odt(tmp_path: Path, monkeypatch)
     np.testing.assert_allclose(off_rgb[0, 0], 0.18, atol=5e-3)
     preview_709 = on.apply(grey)
     assert not np.allclose(on_rgb[0, 0], preview_709, atol=1e-2)
-    assert Path(report_on.written[0].path).name.endswith("_ACES2065-1_proxy")
+    assert Path(report_on.written[0].path).name.endswith("_ACES2065-1")
+    assert not Path(report_on.written[0].path).name.endswith("_ACES2065-1_proxy")
     assert HONEST_PROXY_NOTE in report_on.processed_status_text
     _assert_chengpian_not_a_deliverable_claim(report_on.processed_status_text)
     assert "精准" not in report_on.processed_status_text
@@ -917,14 +921,20 @@ def test_write_loop_one_pass_no_preview_8bit_no_odt(tmp_path: Path, monkeypatch)
 
 def test_honest_proxy_copy_and_filename():
     assert HONEST_PROXY_NOTE == "整段代理，不是全精度成片"
-    assert DELIVERABLE_SUFFIX == "_ACES2065-1_proxy"
-    assert DELIVERABLE_DIR_SUFFIX == "_ACES2065-1_proxy"
-    assert "proxy" in DELIVERABLE_SUFFIX
-    assert "_proxy" in DELIVERABLE_SUFFIX
+    assert DELIVERABLE_SUFFIX == "_ACES2065-1"
+    assert DELIVERABLE_DIR_SUFFIX == "_ACES2065-1"
+    assert PROXY_DIR_SUFFIX == "_ACES2065-1_proxy"
+    assert "_proxy" not in DELIVERABLE_SUFFIX
+    assert "_proxy" in PROXY_DIR_SUFFIX
     assert "acescct" not in DELIVERABLE_SUFFIX.lower()
-    assert deliverable_name("clip.mov") == "clip_ACES2065-1_proxy/frame_000000.exr"
+    assert deliverable_name("clip.mov") == "clip_ACES2065-1/frame_000000.exr"
     assert sequence_frame_name(1) == "frame_000001.exr"
-    assert "_proxy" in deliverable_name("clip.mov")
+    assert "_proxy" not in deliverable_name("clip.mov")
+    assert deliverable_dir_name("clip.mov", reduced_proxy=True) == "clip_ACES2065-1_proxy"
+    assert (
+        deliverable_name("clip.mov", reduced_proxy=True)
+        == "clip_ACES2065-1_proxy/frame_000000.exr"
+    )
     status = processed_status_text(2, 1)
     assert HONEST_PROXY_NOTE in status
     assert "整段代理，不是全精度成片" in status
@@ -957,11 +967,36 @@ def test_honest_proxy_copy_and_filename():
     acceptance = (ROOT / "ACCEPTANCE.md").read_text(encoding="utf-8")
     assert HONEST_PROXY_NOTE in readme
     assert HONEST_PROXY_NOTE in acceptance
+    assert "_ACES2065-1/frame_000000.exr" in readme
     assert "_ACES2065-1_proxy/frame_000000.exr" in readme
     _assert_chengpian_not_a_deliverable_claim(readme)
     _assert_chengpian_not_a_deliverable_claim(acceptance)
     _assert_chengpian_not_a_deliverable_claim(clip)
     _assert_chengpian_not_a_deliverable_claim(content)
+
+
+def test_native_write_omits_proxy_suffix_reduced_keeps_it(tmp_path: Path):
+    """Native-res writes drop _proxy. Reduced (downscaled) writes keep it."""
+    clips = [
+        BatchClip("clip.mov", idt="sony_slog3_sgamut3", duration_seconds=1.0, fps=1.0)
+    ]
+    frames = {"clip.mov": _slog3_grey()}
+
+    native = process_locked_writes(clips, tmp_path / "native", frames=frames)
+    native_dir = Path(native.written[0].path)
+    assert native_dir.name == "clip_ACES2065-1"
+    assert not native_dir.name.endswith("_proxy")
+    assert (native_dir / "frame_000000.exr").is_file()
+    assert not (tmp_path / "native" / "clip_ACES2065-1_proxy").exists()
+
+    reduced = process_locked_writes(
+        clips, tmp_path / "reduced", frames=frames, reduced_proxy=True
+    )
+    reduced_dir = Path(reduced.written[0].path)
+    assert reduced_dir.name == "clip_ACES2065-1_proxy"
+    assert reduced_dir.name.endswith("_proxy")
+    assert (reduced_dir / "frame_000000.exr").is_file()
+    assert not (tmp_path / "reduced" / "clip_ACES2065-1").exists()
 
 
 def test_unlocked_never_writes_sequence(tmp_path: Path):
@@ -1004,7 +1039,8 @@ def test_locked_writes_more_than_one_frame(tmp_path: Path):
     np.testing.assert_allclose(rgb0[0, 0], 0.18, atol=5e-3)
     assert not np.allclose(rgb0, rgb1, atol=1e-3)
     assert not (tmp_path / deliverable_dir_name("pending.mov")).exists()
-    assert "_proxy" in seq.name
+    assert "_ACES2065-1" in seq.name
+    assert not seq.name.endswith("_proxy")
     assert HONEST_PROXY_NOTE in report.processed_status_text
     assert "整段代理，不是全精度成片" in report.processed_status_text
     _assert_chengpian_not_a_deliverable_claim(report.processed_status_text)
@@ -1131,7 +1167,8 @@ def test_last_export_folder_and_finder_reveal(tmp_path: Path):
     assert short_export_path(dest) in report.processed_status_text
     assert HONEST_PROXY_NOTE in report.processed_status_text
     assert report.last_reveal_paths == report.written_paths
-    assert all(Path(p).name.endswith("_ACES2065-1_proxy") for p in report.last_reveal_paths)
+    assert all(Path(p).name.endswith("_ACES2065-1") for p in report.last_reveal_paths)
+    assert all(not Path(p).name.endswith("_proxy") for p in report.last_reveal_paths)
     _assert_chengpian_not_a_deliverable_claim(report.processed_status_text)
     _assert_chengpian_not_a_deliverable_claim(REVEAL_IN_FINDER)
 
@@ -1302,8 +1339,9 @@ def test_sidebar_chip_row_reveals_clip_sequence_folder(tmp_path: Path):
     assert chips["locked.mov"] == WRITTEN_CHIP
     assert written == dest / deliverable_dir_name("locked.mov")
     assert written is not None
-    assert written.name.endswith("_ACES2065-1_proxy")
-    assert written == dest / "locked_ACES2065-1_proxy"
+    assert written.name.endswith("_ACES2065-1")
+    assert not written.name.endswith("_ACES2065-1_proxy")
+    assert written == dest / "locked_ACES2065-1"
     assert written.is_dir()
     assert "成片" not in WRITTEN_CHIP
     _assert_chengpian_not_a_deliverable_claim(WRITTEN_CHIP)

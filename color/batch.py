@@ -6,8 +6,11 @@ Chinese reason. Never guess 5600 or 6504. Never invent a second process
 button. Auto WB estimate does not write CAT until confirm; grey-card
 overrides estimate.
 
-「处理已锁定片段」 writes one ACES2065-1 (AP0 linear) **proxy EXR sequence**
-per locked clip (ODT off): ``{stem}_ACES2065-1_proxy/frame_000000.exr``.
+「处理已锁定片段」 writes one ACES2065-1 (AP0 linear) **EXR sequence**
+per locked clip (ODT off): ``{stem}_ACES2065-1/frame_000000.exr`` at
+native resolution / bit-depth. ``_proxy`` is only in the folder name
+when the write is a reduced (downscaled) proxy
+(``{stem}_ACES2065-1_proxy/frame_000000.exr``).
 The write loop is decode → IDT → exposure → WB → EXR. It uses
 ``apply_ap0`` (clip-constant CAT via ``ap0_write_setup``), not
 ``graph.apply``, so a 709 preview ODT is never baked. Preview/scrub
@@ -38,14 +41,14 @@ Partial output is 不是成片. A successful write remembers the dest folder
 (UserDefaults) and status offers 「在 Finder 中显示」. Cancel does not
 treat a deleted half-folder as success. After a write, locked sidebar
 rows show 「已写出代理」 (or a short Chinese error). Clicking that
-row or chip reveals that clip's ``{stem}_ACES2065-1_proxy/`` from the
+row or chip reveals that clip's ``{stem}_ACES2065-1/`` from the
 last dest (``deliverable_dir_name``). Pending / failed / cancelled
 do not reveal. Pending stay 「先选择 Log 与色域」 / 「先选择成对 IDT」.
 A cancelled in-progress clip is not 已写出; completed clips keep
 已写出代理. Re-export clears or refreshes the chip. Session-level
 「在 Finder 中显示」 stays.
 
-After a locked write, count EXRs in ``{stem}_ACES2065-1_proxy/`` and
+After a locked write, count EXRs in ``{stem}_ACES2065-1/`` and
 compare to source duration × metadata fps only. Off-by-one is accepted
 (inclusive last frame). Missing fps is 「读不到帧率，未核对」; missing
 duration is 「读不到时长，未核对」 — never default 24 or 30, and do
@@ -128,8 +131,10 @@ CANCELLED_STATUS_TEMPLATE = (
     "（先选择 Log 与色域 / 先选择成对 IDT）。"
     "整段代理，不是全精度成片。预览·非成片。已实现（未验证）。"
 )
-# Folder of per-frame EXRs. Names must include _proxy so this is not a 成片 claim.
-DELIVERABLE_DIR_SUFFIX = "_ACES2065-1_proxy"
+# Native-resolution / native bit-depth sequence folder. _proxy is only
+# appended when the write is a reduced (downscaled) proxy.
+DELIVERABLE_DIR_SUFFIX = "_ACES2065-1"
+PROXY_DIR_SUFFIX = "_ACES2065-1_proxy"
 DELIVERABLE_SUFFIX = DELIVERABLE_DIR_SUFFIX
 SEQUENCE_FRAME_PREFIX = "frame"
 SEQUENCE_FRAME_WIDTH = 6
@@ -766,9 +771,14 @@ def never_guess_cct(cct: float | None) -> bool:
     return cct is None
 
 
-def deliverable_dir_name(clip_name: str) -> str:
-    """Sequence folder. ``{stem}_ACES2065-1_proxy`` — proxy, not 成片."""
-    return f"{Path(clip_name).stem}{DELIVERABLE_DIR_SUFFIX}"
+def deliverable_dir_name(clip_name: str, *, reduced_proxy: bool = False) -> str:
+    """Sequence folder.
+
+    Native resolution / bit-depth: ``{stem}_ACES2065-1``.
+    Reduced (downscaled) proxy only: ``{stem}_ACES2065-1_proxy``.
+    """
+    suffix = PROXY_DIR_SUFFIX if reduced_proxy else DELIVERABLE_DIR_SUFFIX
+    return f"{Path(clip_name).stem}{suffix}"
 
 
 def sequence_frame_name(index: int) -> str:
@@ -776,9 +786,14 @@ def sequence_frame_name(index: int) -> str:
     return f"{SEQUENCE_FRAME_PREFIX}_{index:0{SEQUENCE_FRAME_WIDTH}d}.exr"
 
 
-def deliverable_name(clip_name: str, index: int = 0) -> str:
-    """Relative path of one proxy sequence frame. Not a lone ``_frame0`` file."""
-    return f"{deliverable_dir_name(clip_name)}/{sequence_frame_name(index)}"
+def deliverable_name(
+    clip_name: str, index: int = 0, *, reduced_proxy: bool = False
+) -> str:
+    """Relative path of one sequence frame. Not a lone ``_frame0`` file."""
+    return (
+        f"{deliverable_dir_name(clip_name, reduced_proxy=reduced_proxy)}"
+        f"/{sequence_frame_name(index)}"
+    )
 
 
 def as_frame_sequence(value) -> list[np.ndarray]:
@@ -918,7 +933,7 @@ class BatchWriteReport:
 
     @property
     def last_reveal_paths(self) -> tuple[str, ...]:
-        """Completed ``_proxy`` folders. Empty on cancel (half-folder deleted)."""
+        """Completed sequence folders. Empty on cancel (half-folder deleted)."""
         if self.cancelled or self.disk_short:
             return ()
         return self.written_paths
@@ -953,8 +968,9 @@ def process_locked_writes(
     on_progress: Callable[[str], None] | None = None,
     free_bytes: int | None = None,
     ycbcr_tags: dict[str, dict] | None = None,
+    reduced_proxy: bool = False,
 ) -> BatchWriteReport:
-    """Write an ACES2065-1 proxy EXR sequence for locked clips only.
+    """Write an ACES2065-1 EXR sequence for locked clips only.
 
     Unlocked / pending stay listed and never produce a folder. A mixed bin
     (some locked, some pending) still writes the locked ones. ``graph`` is
@@ -962,16 +978,18 @@ def process_locked_writes(
     name → one RGB array or a sequence of arrays. Missing pixels or a write
     failure count as processed (per-clip error), not as a skip reason.
 
-    Output layout (DaVinci image sequence)::
+    Output layout (DaVinci image sequence), native resolution / bit-depth::
 
-        {stem}_ACES2065-1_proxy/frame_000000.exr
-        {stem}_ACES2065-1_proxy/frame_000001.exr
+        {stem}_ACES2065-1/frame_000000.exr
+        {stem}_ACES2065-1/frame_000001.exr
         ...
 
-    This is still a **proxy** sequence (source Y′CbCr → float, not
-    preview 8-bit promoted). Not a Rec.709 movie.
+    Pass ``reduced_proxy=True`` only when writing a downscaled proxy;
+    that path uses ``{stem}_ACES2065-1_proxy/``. Native writes omit
+    ``_proxy``. This is still not a camera-original encode (source
+    Y′CbCr → float, not preview 8-bit promoted). Not a Rec.709 movie.
 
-    ``should_cancel`` stops the batch. The in-progress ``_proxy`` folder is
+    ``should_cancel`` stops the batch. The in-progress sequence folder is
     removed (half sequence is not a finished deliverable). Completed clips
     stay. Cancelled clips are not 「已处理」.
 
@@ -1013,7 +1031,7 @@ def process_locked_writes(
         if should_cancel and should_cancel():
             cancelled = True
             break
-        seq_dir = dest / deliverable_dir_name(clip.name)
+        seq_dir = dest / deliverable_dir_name(clip.name, reduced_proxy=reduced_proxy)
         rgb_frames = as_frame_sequence(frames.get(clip.name))
         if not rgb_frames:
             errors.append(ClipWrite(name=clip.name, error="no pixels"))

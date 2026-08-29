@@ -30,7 +30,7 @@ final class AppSettings: ObservableObject {
     let blockUnlockedIDT: Bool = true
 
     /// Last folder picked for 处理已锁定片段. Next NSOpenPanel starts here.
-    /// Parent dest only — never a deleted half `{stem}_ACES2065-1_proxy` folder.
+    /// Parent dest only — never a deleted half `{stem}_ACES2065-1` / `_proxy` folder.
     @Published var lastExportDirectoryPath: String? {
         didSet {
             if let path = lastExportDirectoryPath, !path.isEmpty {

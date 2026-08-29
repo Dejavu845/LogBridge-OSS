@@ -132,7 +132,8 @@ final class SessionModel: ObservableObject {
     @Published var isWritingDeliverables = false
     /// Same busy flag. Preview progress + inspector / IDT lock read this.
     var isExporting: Bool { isWritingDeliverables }
-    /// Completed `{stem}_ACES2065-1_proxy` folders from the last successful write.
+    /// Completed `{stem}_ACES2065-1` folders from the last successful write
+    /// (`{stem}_ACES2065-1_proxy` only when that write was a reduced proxy).
     /// Empty while writing, after cancel, or when nothing was written.
     @Published var lastExportRevealURLs: [URL] = []
     /// Tiny-disk / test mock. When set, dest free-space check uses this
@@ -632,7 +633,7 @@ final class SessionModel: ObservableObject {
         !isWritingDeliverables && lastExportNote.contains("条已写出代理")
     }
 
-    /// Opens completed `{stem}_ACES2065-1_proxy` folders. Skips missing paths.
+    /// Opens completed `{stem}_ACES2065-1` folders. Skips missing paths.
     func revealLastExportInFinder() {
         let existing = lastExportRevealURLs.filter {
             FileManager.default.fileExists(atPath: $0.path)
@@ -641,7 +642,7 @@ final class SessionModel: ObservableObject {
         NSWorkspace.shared.activateFileViewerSelecting(existing)
     }
 
-    /// Last dest + `{stem}_ACES2065-1_proxy`. Success chip only.
+    /// Last dest + `{stem}_ACES2065-1` (or `_ACES2065-1_proxy` if reduced). Success chip only.
     /// Pending / failed / cancelled do not reveal. 不是成片.
     static func clipSequenceRevealURL(for clip: Clip, dest: URL) -> URL? {
         guard clip.exportChip == wroteProxyChip else { return nil }
