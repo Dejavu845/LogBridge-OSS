@@ -20,6 +20,9 @@ struct ClipSidebarView: View {
             .padding(.horizontal, 10)
             .padding(.top, 8)
             .padding(.bottom, 4)
+            .glassModule(radius: GlassChrome.tileRadius, padding: 0)
+            .padding(.horizontal, 8)
+            .padding(.top, 8)
 
             DropZone(targeted: session.dropTargeted, empty: session.clips.isEmpty)
                 .padding(.horizontal, 10)
@@ -29,7 +32,11 @@ struct ClipSidebarView: View {
                 .font(.caption2)
                 .foregroundStyle(.secondary)
                 .padding(.horizontal, 10)
-                .padding(.bottom, 4)
+                .padding(.vertical, 6)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .glassModule(radius: GlassChrome.tileRadius, padding: 0)
+                .padding(.horizontal, 8)
+                .padding(.bottom, 6)
 
             if !session.lastImportNote.isEmpty {
                 Text(session.lastImportNote)
@@ -65,6 +72,7 @@ struct ClipSidebarView: View {
                 }
             }
         }
+        .background { GlassRail() }
     }
 }
 
@@ -85,20 +93,36 @@ private struct DropZone: View {
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
                 Text("已实现（未验证）")
-                    .font(.caption2)
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(Color.orange.opacity(0.2))
-                    .clipShape(Capsule())
+                    .font(.caption2.weight(.semibold))
+                    .padding(.horizontal, 7)
+                    .padding(.vertical, 3)
+                    .background {
+                        Capsule()
+                            .fill(GlassChrome.pending.opacity(0.28))
+                    }
+                    .overlay {
+                        Capsule()
+                            .strokeBorder(Color.white.opacity(0.28), lineWidth: 0.8)
+                    }
+                    .foregroundStyle(GlassChrome.pending)
             }
         }
         .frame(maxWidth: .infinity)
         .padding(empty ? 22 : 6)
-        .background(targeted ? Color.accentColor.opacity(0.15) : Color.primary.opacity(0.04))
+        .background {
+            RoundedRectangle(cornerRadius: GlassChrome.moduleRadius, style: .continuous)
+                .fill(.ultraThinMaterial)
+                .overlay {
+                    RoundedRectangle(cornerRadius: GlassChrome.moduleRadius, style: .continuous)
+                        .fill(targeted ? GlassChrome.locked.opacity(0.12) : Color.clear)
+                }
+        }
         .overlay(
-            RoundedRectangle(cornerRadius: 8)
-                .strokeBorder(style: StrokeStyle(lineWidth: 1, dash: [5]))
-                .foregroundStyle(targeted ? Color.accentColor : Color.secondary.opacity(0.4))
+            RoundedRectangle(cornerRadius: GlassChrome.moduleRadius, style: .continuous)
+                .strokeBorder(
+                    style: StrokeStyle(lineWidth: targeted ? 1.5 : 1, dash: [5])
+                )
+                .foregroundStyle(targeted ? GlassChrome.locked : GlassChrome.hairline)
         )
     }
 }
@@ -121,13 +145,11 @@ struct ClipRow: View {
                         .foregroundStyle(clip.isPending ? Color.secondary : Color.primary)
                         .lineLimit(1)
                     Spacer(minLength: 4)
-                    Text(clip.isPending ? "待选" : "已锁定")
-                        .font(.caption2.weight(clip.isPending ? .regular : .semibold))
-                        .padding(.horizontal, 5)
-                        .padding(.vertical, 1)
-                        .background(clip.isPending ? Color.yellow.opacity(0.28) : Color.accentColor.opacity(0.16))
-                        .foregroundStyle(clip.isPending ? Color.primary : Color.accentColor)
-                        .clipShape(Capsule())
+                    GlassChip(
+                        title: clip.isPending ? "待选" : "已锁定",
+                        on: !clip.isPending,
+                        pending: clip.isPending
+                    )
                 }
                 Text(clip.lockedPairLabel)
                     .font(.caption)
@@ -158,6 +180,15 @@ struct ClipRow: View {
         .padding(.horizontal, 10)
         .padding(.vertical, 5)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(selected ? Color.accentColor.opacity(0.10) : Color.clear)
+        .background {
+            RoundedRectangle(cornerRadius: GlassChrome.tileRadius, style: .continuous)
+                .fill(selected ? Color.white.opacity(0.10) : Color.white.opacity(0.03))
+        }
+        .overlay {
+            RoundedRectangle(cornerRadius: GlassChrome.tileRadius, style: .continuous)
+                .strokeBorder(selected ? GlassChrome.hairline : Color.clear, lineWidth: 1)
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 2)
     }
 }

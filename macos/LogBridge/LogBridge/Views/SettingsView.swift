@@ -52,5 +52,7 @@ struct SettingsView: View {
         .formStyle(.grouped)
         .frame(minWidth: 420, minHeight: 320)
         .navigationTitle("设置")
+        .preferredColorScheme(.dark)
+        .background { LiquidBackdrop() }
     }
 }

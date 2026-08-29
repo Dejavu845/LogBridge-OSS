@@ -29,6 +29,7 @@ struct ContentView: View {
             InspectorView(session: session)
                 .frame(minWidth: 196, idealWidth: 220, maxWidth: 260)
         }
+        .background { LiquidBackdrop() }
         .onDrop(of: [.fileURL], isTargeted: $session.dropTargeted) { providers in
             session.importProviders(providers)
             return true
@@ -220,7 +221,9 @@ struct ProcessLockedBar: View {
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 5)
-        .background(Color.primary.opacity(0.03))
+        .glassModule(radius: GlassChrome.tileRadius, padding: 0)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
     }
 }
 
@@ -255,7 +258,9 @@ struct AdvancedPanel: View {
         .help("节点与导出 ACEScct / EXR。默认收起。预览·非成片。")
         .padding(.horizontal, 10)
         .padding(.vertical, 3)
-        .background(Color.primary.opacity(0.02))
+        .glassModule(radius: GlassChrome.tileRadius, padding: 0)
+        .padding(.horizontal, 8)
+        .padding(.bottom, 4)
     }
 }
 
@@ -296,7 +301,13 @@ struct SplitPreview: View {
                     )
                 }
             }
-            .padding(2)
+            .padding(8)
+            .clipShape(RoundedRectangle(cornerRadius: GlassChrome.moduleRadius, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: GlassChrome.moduleRadius, style: .continuous)
+                    .strokeBorder(GlassChrome.hairline, lineWidth: 1)
+            }
+            .padding(8)
             if session.isExporting {
                 WriteProgressLine(text: session.lastExportNote)
             } else if let caption = session.selectedClip?.previewCaption {
@@ -317,9 +328,12 @@ struct WriteProgressLine: View {
             .foregroundStyle(.secondary)
             .lineLimit(1)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .background(Color.accentColor.opacity(0.08))
+            .padding(.horizontal, 10)
+            .padding(.vertical, 5)
+            .background(.ultraThinMaterial)
+            .overlay(alignment: .top) {
+                GlassHairline()
+            }
     }
 }
 
@@ -360,7 +374,10 @@ struct StatusBar: View {
         }
         .font(.caption)
         .padding(.horizontal, 10)
-        .padding(.vertical, 5)
-        .background(.bar)
+        .padding(.vertical, 6)
+        .background(.ultraThinMaterial)
+        .overlay(alignment: .top) {
+            GlassHairline()
+        }
     }
 }

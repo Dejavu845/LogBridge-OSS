@@ -30,7 +30,12 @@ struct NodeStripView: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
-        .background(.bar)
+        .background(.ultraThinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: GlassChrome.tileRadius, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: GlassChrome.tileRadius, style: .continuous)
+                .strokeBorder(GlassChrome.hairlineDim, lineWidth: 1)
+        }
     }
 
     private func chipDetail(_ slot: NodeSlot) -> String {
@@ -98,12 +103,21 @@ private struct NodeChip: View {
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
-        .background(selected ? Color.accentColor.opacity(0.14) : Color.primary.opacity(0.04))
+        .background {
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .fill(.ultraThinMaterial)
+                .overlay {
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .fill(selected ? Color.accentColor.opacity(0.16) : Color.white.opacity(0.04))
+                }
+        }
         .overlay(
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(selected ? Color.accentColor : Color.primary.opacity(0.12), lineWidth: selected ? 1.5 : 1)
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .strokeBorder(
+                    selected ? GlassChrome.locked.opacity(0.7) : GlassChrome.hairlineDim,
+                    lineWidth: selected ? 1.2 : 0.8
+                )
         )
-        .clipShape(RoundedRectangle(cornerRadius: 8))
         .opacity(enabled || slot == .idt ? 1 : 0.7)
     }
 }

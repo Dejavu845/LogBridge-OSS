@@ -63,9 +63,13 @@ struct PreviewNotDeliverableBadge: View {
             .font(.caption2.weight(.bold))
             .padding(.horizontal, 6)
             .padding(.vertical, 3)
-            .background(.black.opacity(0.72))
+            .background(.ultraThinMaterial)
             .foregroundStyle(.white)
-            .clipShape(RoundedRectangle(cornerRadius: 5))
+            .clipShape(RoundedRectangle(cornerRadius: 5, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 5, style: .continuous)
+                    .strokeBorder(Color.white.opacity(0.22), lineWidth: 0.8)
+            }
             .padding(6)
             .accessibilityLabel("预览·非成片. 8-bit thumbnail is not a deliverable")
             .help("8-bit thumbnail is not a deliverable")

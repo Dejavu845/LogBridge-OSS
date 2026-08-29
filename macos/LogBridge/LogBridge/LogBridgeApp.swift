@@ -7,6 +7,7 @@ struct LogBridgeApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .preferredColorScheme(.dark)
         }
         .defaultSize(width: 1440, height: 900)
         .commands {

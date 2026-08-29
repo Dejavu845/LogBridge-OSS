@@ -38,12 +38,11 @@ struct PairedIDTBar: View {
                 // S-Log3 + S-Gamut3 vs S-Log3 + S-Gamut3.Cine. C-Log2 / C-Log3 + Cinema Gamut vs BT.2020. Venice pair only if detected.
                 .help("成对选择：S-Log3 + S-Gamut3 或 S-Log3 + S-Gamut3.Cine。C-Log2 / C-Log3 选 Cinema Gamut 或 BT.2020。Venice 成对只在检测到机身时出现。")
                 HStack(spacing: 6) {
-                    Text(clip.verificationBadge)
-                        .font(.caption2)
-                        .padding(.horizontal, 5)
-                        .padding(.vertical, 1)
-                        .background(clip.isPending ? Color.yellow.opacity(0.28) : Color.orange.opacity(0.2))
-                        .clipShape(Capsule())
+                    GlassChip(
+                        title: clip.verificationBadge,
+                        on: !clip.isPending,
+                        pending: clip.isPending
+                    )
                     Text("来源：\(clip.detectionSource.displayLabel)")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
@@ -71,7 +70,9 @@ struct PairedIDTBar: View {
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.primary.opacity(0.03))
+        .glassModule(radius: GlassChrome.tileRadius, padding: 0)
+        .padding(.horizontal, 8)
+        .padding(.top, 2)
     }
 }
 
@@ -84,7 +85,6 @@ struct InspectorView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 10) {
                 ExposureInspector(session: session)
-                Divider()
                 WBInspector(session: session)
             }
             .disabled(session.isExporting)
@@ -92,7 +92,7 @@ struct InspectorView: View {
             .padding(8)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .background(Color.primary.opacity(0.02))
+        .background { GlassRail(edge: .leading) }
     }
 }
 
@@ -110,19 +110,14 @@ struct WBInspector: View {
             .controlSize(.small)
             // Three states only. Estimate chip lights AFTER confirm, never on propose.
             HStack(spacing: 4) {
-                WBStateChip(title: "机内 as-shot", on: session.graph.wbSource == .asShot)
-                WBStateChip(
+                GlassChip(title: "机内 as-shot", on: session.graph.wbSource == .asShot)
+                GlassChip(
                     title: "白平衡（估计）",
                     on: session.graph.wbSource == .estimate
                 )
-                WBStateChip(title: "灰卡", on: session.graph.wbSource == .grey)
+                GlassChip(title: "灰卡", on: session.graph.wbSource == .grey)
                 if session.graph.asShotUnknown {
-                    Text("机内未知")
-                        .font(.caption2)
-                        .padding(.horizontal, 5)
-                        .padding(.vertical, 1)
-                        .background(Color.yellow.opacity(0.28))
-                        .clipShape(Capsule())
+                    GlassChip(title: "机内未知", on: true, pending: true)
                 }
             }
             if session.graph.asShotUnknown {
@@ -197,20 +192,7 @@ struct WBInspector: View {
                 .font(.caption2)
                 .foregroundStyle(.secondary)
         }
-    }
-}
-
-private struct WBStateChip: View {
-    let title: String
-    let on: Bool
-    var body: some View {
-        Text(title)
-            .font(.caption2.weight(.semibold))
-            .padding(.horizontal, 6)
-            .padding(.vertical, 2)
-            .background(on ? Color.accentColor.opacity(0.18) : Color.primary.opacity(0.05))
-            .foregroundStyle(on ? Color.accentColor : Color.secondary)
-            .clipShape(Capsule())
+        .glassModule(radius: GlassChrome.tileRadius)
     }
 }
 
@@ -234,16 +216,16 @@ struct ODTInspector: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
             if session.graph.odt == .rec709 {
-                Text("Rec.709 is preview only, not the standard deliverable. Tagged CGColorSpace.itur_709 only when this node is Rec.709. No RRT. Implemented (unverified).")
+                Text("Rec.709 仅预览，不是成片。只有本节点是 Rec.709 时才标 CGColorSpace.itur_709。无 RRT。已实现（未验证）。")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
             if session.graph.odt.isHDR {
-                Text("ColorSync itur_2100. 预览·非成片，未与 709 匹配. 已实现（未验证）. Not an ACES Output Transform. No homemade HLG/PQ. Not supported. Not 一键精准.")
+                Text("ColorSync itur_2100。预览·非成片，未与 709 匹配。已实现（未验证）。不是 ACES Output Transform。不自制 HLG/PQ。Not 一键精准.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
-            Text("Working space: \(session.graph.workingSpace.rawValue). 导出 ACEScct / EXR is the timeline deliverable. Rec.709 / HLG / PQ panes are 预览·非成片 — not a finished grade.")
+            Text("工作空间 \(session.graph.workingSpace.rawValue)。时间线成片走导出 ACEScct / EXR。Rec.709 / HLG / PQ 窗是预览·非成片，不是完成调色。")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
@@ -291,5 +273,6 @@ struct ExposureInspector: View {
                 .font(.caption2)
                 .foregroundStyle(.secondary)
         }
+        .glassModule(radius: GlassChrome.tileRadius)
     }
 }

@@ -30,6 +30,7 @@
 		A10000000000000000000015 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000017 /* AppSettings.swift */; };
 		A10000000000000000000016 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000018 /* SettingsView.swift */; };
 		A10000000000000000000017 /* HDRPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000019 /* HDRPreview.swift */; };
+		A10000000000000000000018 /* GlassChrome.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000001A /* GlassChrome.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -57,6 +58,7 @@
 		A20000000000000000000017 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
 		A20000000000000000000018 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		A20000000000000000000019 /* HDRPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HDRPreview.swift; sourceTree = "<group>"; };
+		A2000000000000000000001A /* GlassChrome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassChrome.swift; sourceTree = "<group>"; };
 		A2000000000000000000000F /* LogBridge.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LogBridge.entitlements; sourceTree = "<group>"; };
 		A30000000000000000000001 /* LogBridge.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LogBridge.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -123,6 +125,7 @@
 				A20000000000000000000012 /* InspectorView.swift */,
 				A20000000000000000000013 /* ClipSidebarView.swift */,
 				A20000000000000000000018 /* SettingsView.swift */,
+				A2000000000000000000001A /* GlassChrome.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -275,6 +278,7 @@
 				A10000000000000000000015 /* AppSettings.swift in Sources */,
 				A10000000000000000000016 /* SettingsView.swift in Sources */,
 				A10000000000000000000017 /* HDRPreview.swift in Sources */,
+				A10000000000000000000018 /* GlassChrome.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
